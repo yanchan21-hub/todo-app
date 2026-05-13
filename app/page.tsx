@@ -76,7 +76,7 @@ export default function Home() {
               className="rounded-xl border border-red-300 px-5 py-2.5 text-sm font-medium text-red-400
                          transition-colors hover:bg-red-50 hover:text-red-600 active:bg-red-100"
             >
-              全てリセット
+              全て削除
             </button>
           </div>
         )}
