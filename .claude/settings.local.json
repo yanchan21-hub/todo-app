@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-Content \"C:\\\\Users\\\\yanch\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\F--todo-app\\\\a50040ca-e6e4-483b-8a26-bd0b03505b96\\\\tasks\\\\b83txg6oh.output\" -Wait)",
+      "Bash(Select-String --line-buffered \"Ready|ready|error|Error|localhost\")",
+      "Bash(Get-Content \"C:\\\\Users\\\\yanch\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\F--todo-app\\\\a50040ca-e6e4-483b-8a26-bd0b03505b96\\\\tasks\\\\bh8ji279t.output\" -Wait)",
+      "Bash(Select-String --line-buffered \"main|error|Error|fatal|remote|Branch\")"
+    ]
+  }
+}
