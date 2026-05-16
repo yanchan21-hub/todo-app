@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Todo } from '@/types/todo';
+import type { Todo, Category } from '@/types/todo';
 import { loadTodos, saveTodos } from '@/lib/storage';
 import TodoInput from '@/components/TodoInput';
 import TodoList from '@/components/TodoList';
@@ -19,12 +19,13 @@ export default function Home() {
     if (mounted) saveTodos(todos);
   }, [todos, mounted]);
 
-  function handleAdd(text: string) {
+  function handleAdd(text: string, category: Category) {
     const newTodo: Todo = {
       id: crypto.randomUUID(),
       text,
       completed: false,
       createdAt: Date.now(),
+      category,
     };
     setTodos((prev) => [newTodo, ...prev]);
   }

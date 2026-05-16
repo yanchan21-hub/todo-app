@@ -6,7 +6,15 @@ export function loadTodos(): Todo[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Todo[]) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as Partial<Todo>[];
+    return parsed.map((t) => ({
+      id: t.id ?? '',
+      text: t.text ?? '',
+      completed: t.completed ?? false,
+      createdAt: t.createdAt ?? Date.now(),
+      category: t.category ?? 'その他',
+    }));
   } catch {
     return [];
   }
