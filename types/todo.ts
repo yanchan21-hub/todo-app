@@ -8,5 +8,5 @@ export type Todo = {
   completed: boolean;
   createdAt: number;
   category: Category;
-  dueDate?: string; // YYYY-MM-DD
+  dueDate?: string; // YYYY-MM-DDTHH:MM (ISO datetime, local time)
 };

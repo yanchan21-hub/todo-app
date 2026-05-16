@@ -31,21 +31,35 @@ const DUE_BADGE_STYLES: Record<DueStatus, string> = {
   normal:  'border-gray-200 bg-gray-100 text-gray-500',
 };
 
-function getDueStatus(dueDate: string): DueStatus {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+// YYYY-MM-DDTHH:MM → Date (local time). Falls back to date-only parsing for legacy data.
+function parseDueDate(dueDate: string): Date {
+  if (dueDate.includes('T')) return new Date(dueDate);
   const [y, m, d] = dueDate.split('-').map(Number);
-  const due = new Date(y, m - 1, d);
-  const diffDays = Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays < 0) return 'overdue';
-  if (diffDays === 0) return 'today';
-  if (diffDays <= 2) return 'soon';
-  return 'normal';
+  return new Date(y, m - 1, d);
 }
 
 function formatDate(dueDate: string): string {
-  const [, m, d] = dueDate.split('-').map(Number);
+  const due = parseDueDate(dueDate);
+  const m = due.getMonth() + 1;
+  const d = due.getDate();
+  if (dueDate.includes('T')) {
+    const h = String(due.getHours()).padStart(2, '0');
+    const min = String(due.getMinutes()).padStart(2, '0');
+    return `${m}/${d} ${h}:${min}`;
+  }
   return `${m}/${d}`;
+}
+
+function getDueStatus(dueDate: string): DueStatus {
+  const now = new Date();
+  const due = parseDueDate(dueDate);
+  if (due < now) return 'overdue';
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dueStart = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+  const dayDiff = Math.round((dueStart.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24));
+  if (dayDiff === 0) return 'today';
+  if (dayDiff <= 2) return 'soon';
+  return 'normal';
 }
 
 function getDueDateLabel(dueDate: string, status: DueStatus): string {
@@ -53,11 +67,11 @@ function getDueDateLabel(dueDate: string, status: DueStatus): string {
   if (status === 'overdue') return `${dateStr} 期限切れ`;
   if (status === 'today') return `今日まで (${dateStr})`;
   if (status === 'soon') {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const [y, m, d] = dueDate.split('-').map(Number);
-    const due = new Date(y, m - 1, d);
-    const diffDays = Math.round((due.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const due = parseDueDate(dueDate);
+    const dueStart = new Date(due.getFullYear(), due.getMonth(), due.getDate());
+    const diffDays = Math.round((dueStart.getTime() - todayStart.getTime()) / (1000 * 60 * 60 * 24));
     return `あと${diffDays}日 (${dateStr})`;
   }
   return dateStr;

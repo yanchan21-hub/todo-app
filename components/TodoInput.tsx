@@ -76,7 +76,7 @@ export default function TodoInput({ onAdd }: Props) {
         </label>
         <input
           id="due-date"
-          type="date"
+          type="datetime-local"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
           className="flex-1 rounded-xl border border-gray-300 px-3 py-2 text-sm text-gray-700
