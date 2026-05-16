@@ -19,13 +19,14 @@ export default function Home() {
     if (mounted) saveTodos(todos);
   }, [todos, mounted]);
 
-  function handleAdd(text: string, category: Category) {
+  function handleAdd(text: string, category: Category, dueDate?: string) {
     const newTodo: Todo = {
       id: crypto.randomUUID(),
       text,
       completed: false,
       createdAt: Date.now(),
       category,
+      ...(dueDate ? { dueDate } : {}),
     };
     setTodos((prev) => [newTodo, ...prev]);
   }

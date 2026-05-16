@@ -4,7 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { CATEGORIES, type Category } from '@/types/todo';
 
 type Props = {
-  onAdd: (text: string, category: Category) => void;
+  onAdd: (text: string, category: Category, dueDate?: string) => void;
 };
 
 const ACTIVE_STYLES: Record<Category, string> = {
@@ -17,13 +17,15 @@ const ACTIVE_STYLES: Record<Category, string> = {
 export default function TodoInput({ onAdd }: Props) {
   const [value, setValue] = useState('');
   const [category, setCategory] = useState<Category>('仕事');
+  const [dueDate, setDueDate] = useState('');
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const trimmed = value.trim();
     if (!trimmed) return;
-    onAdd(trimmed, category);
+    onAdd(trimmed, category, dueDate || undefined);
     setValue('');
+    setDueDate('');
   }
 
   return (
@@ -49,6 +51,7 @@ export default function TodoInput({ onAdd }: Props) {
           追加
         </button>
       </div>
+
       <div className="flex gap-2">
         {CATEGORIES.map((cat) => (
           <button
@@ -65,6 +68,30 @@ export default function TodoInput({ onAdd }: Props) {
             {cat}
           </button>
         ))}
+      </div>
+
+      <div className="flex items-center gap-2">
+        <label htmlFor="due-date" className="shrink-0 text-sm text-gray-500">
+          期限日
+        </label>
+        <input
+          id="due-date"
+          type="date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          className="flex-1 rounded-xl border border-gray-300 px-3 py-2 text-sm text-gray-700
+                     focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+        />
+        {dueDate && (
+          <button
+            type="button"
+            onClick={() => setDueDate('')}
+            className="shrink-0 rounded-lg px-2.5 py-2 text-xs font-medium text-gray-400
+                       transition-colors hover:bg-gray-100 hover:text-gray-600"
+          >
+            クリア
+          </button>
+        )}
       </div>
     </form>
   );

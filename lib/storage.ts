@@ -14,6 +14,7 @@ export function loadTodos(): Todo[] {
       completed: t.completed ?? false,
       createdAt: t.createdAt ?? Date.now(),
       category: t.category ?? 'その他',
+      ...(t.dueDate ? { dueDate: t.dueDate } : {}),
     }));
   } catch {
     return [];
