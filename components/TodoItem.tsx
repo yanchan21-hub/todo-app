@@ -1,11 +1,13 @@
 'use client';
 
-import type { Todo, Category } from '@/types/todo';
+import { useState } from 'react';
+import { CATEGORIES, type Todo, type Category } from '@/types/todo';
 
 type Props = {
   todo: Todo;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  onEdit: (id: string, text: string, category: Category, dueDate?: string) => void;
 };
 
 const BADGE_STYLES: Record<Category, string> = {
@@ -22,6 +24,18 @@ const LEFT_BORDER: Record<Category, string> = {
   'その他': 'border-l-gray-300',
 };
 
+const ACTIVE_STYLES: Record<Category, string> = {
+  '仕事': 'border-blue-400 bg-blue-50 text-blue-700',
+  '学習': 'border-purple-400 bg-purple-50 text-purple-700',
+  '家事': 'border-green-400 bg-green-50 text-green-700',
+  'その他': 'border-gray-400 bg-gray-50 text-gray-600',
+};
+
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
+const MINUTES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+const SELECT_CLASS =
+  'rounded-lg border border-gray-300 px-2 py-1.5 text-sm text-gray-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 disabled:bg-gray-50 disabled:text-gray-300';
+
 type DueStatus = 'overdue' | 'today' | 'soon' | 'normal';
 
 const DUE_BADGE_STYLES: Record<DueStatus, string> = {
@@ -31,7 +45,6 @@ const DUE_BADGE_STYLES: Record<DueStatus, string> = {
   normal:  'border-gray-200 bg-gray-100 text-gray-500',
 };
 
-// YYYY-MM-DDTHH:MM → Date (local time). Falls back to date-only parsing for legacy data.
 function parseDueDate(dueDate: string): Date {
   if (dueDate.includes('T')) return new Date(dueDate);
   const [y, m, d] = dueDate.split('-').map(Number);
@@ -77,7 +90,146 @@ function getDueDateLabel(dueDate: string, status: DueStatus): string {
   return dateStr;
 }
 
-export default function TodoItem({ todo, onToggle, onDelete }: Props) {
+function splitDueDate(dueDate?: string) {
+  if (!dueDate) return { date: '', hour: 0, minute: 0 };
+  if (dueDate.includes('T')) {
+    const [datePart, timePart] = dueDate.split('T');
+    const [h, m] = timePart.split(':').map(Number);
+    const roundedMinute = Math.min(55, Math.round(m / 5) * 5);
+    return { date: datePart, hour: h, minute: roundedMinute };
+  }
+  return { date: dueDate, hour: 0, minute: 0 };
+}
+
+export default function TodoItem({ todo, onToggle, onDelete, onEdit }: Props) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState('');
+  const [editCategory, setEditCategory] = useState<Category>('仕事');
+  const [editDueDate, setEditDueDate] = useState('');
+  const [editHour, setEditHour] = useState(0);
+  const [editMinute, setEditMinute] = useState(0);
+
+  function startEdit() {
+    const split = splitDueDate(todo.dueDate);
+    setEditText(todo.text);
+    setEditCategory(todo.category);
+    setEditDueDate(split.date);
+    setEditHour(split.hour);
+    setEditMinute(split.minute);
+    setIsEditing(true);
+  }
+
+  function handleSave() {
+    const trimmed = editText.trim();
+    if (!trimmed) return;
+    const due = editDueDate
+      ? `${editDueDate}T${String(editHour).padStart(2, '0')}:${String(editMinute).padStart(2, '0')}`
+      : undefined;
+    onEdit(todo.id, trimmed, editCategory, due);
+    setIsEditing(false);
+  }
+
+  function handleCancel() {
+    setIsEditing(false);
+  }
+
+  if (isEditing) {
+    return (
+      <li
+        className={`flex flex-col gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 shadow-sm
+          border-l-4 ${LEFT_BORDER[editCategory]}`}
+      >
+        <input
+          type="text"
+          value={editText}
+          onChange={(e) => setEditText(e.target.value)}
+          autoFocus
+          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base text-gray-800
+                     focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+        />
+        <div className="flex gap-2">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setEditCategory(cat)}
+              className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors
+                ${
+                  editCategory === cat
+                    ? ACTIVE_STYLES[cat]
+                    : 'border-gray-200 bg-white text-gray-500 hover:bg-gray-50'
+                }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="shrink-0 text-sm text-gray-500">期限日</span>
+          <input
+            type="date"
+            value={editDueDate}
+            onChange={(e) => setEditDueDate(e.target.value)}
+            className="rounded-xl border border-gray-300 px-3 py-1.5 text-sm text-gray-700
+                       focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          />
+          <select
+            value={editHour}
+            onChange={(e) => setEditHour(Number(e.target.value))}
+            disabled={!editDueDate}
+            aria-label="時"
+            className={SELECT_CLASS}
+          >
+            {HOURS.map((h) => (
+              <option key={h} value={h}>{h}時</option>
+            ))}
+          </select>
+          <select
+            value={editMinute}
+            onChange={(e) => setEditMinute(Number(e.target.value))}
+            disabled={!editDueDate}
+            aria-label="分"
+            className={SELECT_CLASS}
+          >
+            {MINUTES.map((min) => (
+              <option key={min} value={min}>{String(min).padStart(2, '0')}分</option>
+            ))}
+          </select>
+          {editDueDate && (
+            <button
+              type="button"
+              onClick={() => { setEditDueDate(''); setEditHour(0); setEditMinute(0); }}
+              className="shrink-0 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-400
+                         transition-colors hover:bg-gray-100 hover:text-gray-600"
+            >
+              クリア
+            </button>
+          )}
+        </div>
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600
+                       transition-colors hover:bg-gray-50"
+          >
+            キャンセル
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!editText.trim()}
+            className="rounded-xl bg-blue-500 px-4 py-2 text-sm font-medium text-white
+                       transition-colors hover:bg-blue-600 active:bg-blue-700
+                       disabled:cursor-not-allowed disabled:bg-gray-300"
+          >
+            保存
+          </button>
+        </div>
+      </li>
+    );
+  }
+
   const dueStatus = todo.dueDate ? getDueStatus(todo.dueDate) : null;
 
   return (
@@ -130,6 +282,15 @@ export default function TodoItem({ todo, onToggle, onDelete }: Props) {
       >
         {todo.category}
       </span>
+
+      <button
+        onClick={startEdit}
+        aria-label="編集"
+        className="shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium text-blue-400
+                   transition-colors hover:bg-blue-50 hover:text-blue-600 active:bg-blue-100"
+      >
+        編集
+      </button>
 
       <button
         onClick={() => onDelete(todo.id)}

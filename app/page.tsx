@@ -41,6 +41,12 @@ export default function Home() {
     setTodos((prev) => prev.filter((todo) => todo.id !== id));
   }
 
+  function handleEdit(id: string, text: string, category: Category, dueDate?: string) {
+    setTodos((prev) =>
+      prev.map((todo) => (todo.id === id ? { ...todo, text, category, dueDate } : todo))
+    );
+  }
+
   function handleReset() {
     if (!window.confirm('全てのタスクを削除しますか？')) return;
     setTodos([]);
@@ -65,7 +71,7 @@ export default function Home() {
 
         <section>
           {mounted ? (
-            <TodoList todos={todos} onToggle={handleToggle} onDelete={handleDelete} />
+            <TodoList todos={todos} onToggle={handleToggle} onDelete={handleDelete} onEdit={handleEdit} />
           ) : (
             <div className="py-12 text-center text-gray-300 text-lg">読み込み中...</div>
           )}

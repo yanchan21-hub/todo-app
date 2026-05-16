@@ -1,13 +1,14 @@
-import type { Todo } from '@/types/todo';
+import type { Todo, Category } from '@/types/todo';
 import TodoItem from './TodoItem';
 
 type Props = {
   todos: Todo[];
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  onEdit: (id: string, text: string, category: Category, dueDate?: string) => void;
 };
 
-export default function TodoList({ todos, onToggle, onDelete }: Props) {
+export default function TodoList({ todos, onToggle, onDelete, onEdit }: Props) {
   if (todos.length === 0) {
     return (
       <div className="py-12 text-center text-gray-400">
@@ -26,7 +27,7 @@ export default function TodoList({ todos, onToggle, onDelete }: Props) {
       </p>
       <ul className="flex flex-col gap-2">
         {todos.map((todo) => (
-          <TodoItem key={todo.id} todo={todo} onToggle={onToggle} onDelete={onDelete} />
+          <TodoItem key={todo.id} todo={todo} onToggle={onToggle} onDelete={onDelete} onEdit={onEdit} />
         ))}
       </ul>
     </div>
