@@ -58,27 +58,16 @@ export default function TodoInput({ onAdd }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="タスクを入力してください"
-          className="flex-1 rounded-xl border border-gray-300 px-4 py-3 text-base
-                     focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200
-                     placeholder:text-gray-400"
-          aria-label="新しいタスク"
-        />
-        <button
-          type="submit"
-          disabled={!value.trim()}
-          className="rounded-xl bg-blue-500 px-5 py-3 text-base font-semibold text-white
-                     transition-colors hover:bg-blue-600 active:bg-blue-700
-                     disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-400"
-        >
-          追加
-        </button>
-      </div>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="タスクを入力してください"
+        className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base
+                   focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200
+                   placeholder:text-gray-400"
+        aria-label="新しいタスク"
+      />
 
       <div className="flex gap-2">
         {CATEGORIES.map((cat) => (
@@ -140,6 +129,16 @@ export default function TodoInput({ onAdd }: Props) {
           </button>
         )}
       </div>
+
+      <button
+        type="submit"
+        disabled={!value.trim()}
+        className="w-full rounded-xl bg-blue-500 py-3 text-base font-semibold text-white
+                   transition-colors hover:bg-blue-600 active:bg-blue-700
+                   disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-400"
+      >
+        追加
+      </button>
     </form>
   );
 }
