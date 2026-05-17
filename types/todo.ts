@@ -9,4 +9,5 @@ export type Todo = {
   createdAt: number;
   category: Category;
   dueDate?: string; // YYYY-MM-DDTHH:MM (ISO datetime, local time)
+  completedAt?: number; // Unix timestamp (ms)
 };
