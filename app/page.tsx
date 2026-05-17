@@ -71,6 +71,13 @@ export default function Home() {
         </header>
 
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+          {/* Calendar sidebar */}
+          {mounted && (
+            <aside className="lg:sticky lg:top-10 lg:w-72 lg:shrink-0">
+              <CalendarView todos={todos} />
+            </aside>
+          )}
+
           {/* Todo section */}
           <div className="min-w-0 flex-1">
             <section className="mb-6">
@@ -98,12 +105,6 @@ export default function Home() {
             )}
           </div>
 
-          {/* Calendar sidebar */}
-          {mounted && (
-            <aside className="lg:sticky lg:top-10 lg:w-72 lg:shrink-0">
-              <CalendarView todos={todos} />
-            </aside>
-          )}
         </div>
       </div>
     </main>
