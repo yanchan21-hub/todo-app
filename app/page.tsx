@@ -7,6 +7,15 @@ import TodoInput from '@/components/TodoInput';
 import TodoList from '@/components/TodoList';
 import CalendarView from '@/components/CalendarView';
 
+function todayDateString(): string {
+  return new Date().toDateString();
+}
+
+function isCompletedToday(completedAt: number | undefined, todayStr: string): boolean {
+  if (!completedAt) return false;
+  return new Date(completedAt).toDateString() === todayStr;
+}
+
 function getMotivationalMessage(remaining: number, total: number): string {
   if (total === 0) return 'さあ、今日のタスクを追加しましょう！';
   if (remaining === 0) return '全タスク完了！最高の一日！🌟';
@@ -19,11 +28,22 @@ function getMotivationalMessage(remaining: number, total: number): string {
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [mounted, setMounted] = useState(false);
+  // Tracks the current date; updates at midnight to trigger re-filter
+  const [todayStr, setTodayStr] = useState(todayDateString);
 
   useEffect(() => {
     setTodos(loadTodos());
     setMounted(true);
   }, []);
+
+  // Reset todayStr at midnight so completed-task filter refreshes automatically
+  useEffect(() => {
+    const now = new Date();
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const msUntilMidnight = midnight.getTime() - now.getTime();
+    const timer = setTimeout(() => setTodayStr(todayDateString()), msUntilMidnight);
+    return () => clearTimeout(timer);
+  }, [todayStr]);
 
   useEffect(() => {
     if (mounted) saveTodos(todos);
@@ -66,9 +86,14 @@ export default function Home() {
     setTodos([]);
   }
 
-  const remaining = todos.filter((t) => !t.completed).length;
-  const completed = todos.filter((t) => t.completed).length;
-  const total = todos.length;
+  // Only show incomplete tasks or tasks completed today
+  const displayedTodos = todos.filter(
+    (t) => !t.completed || isCompletedToday(t.completedAt, todayStr)
+  );
+
+  const remaining = displayedTodos.filter((t) => !t.completed).length;
+  const completed = displayedTodos.filter((t) => t.completed).length;
+  const total = displayedTodos.length;
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
   const message = getMotivationalMessage(remaining, total);
 
@@ -93,7 +118,7 @@ export default function Home() {
 
           <p className="mt-2 text-sm font-medium text-gray-500">{message}</p>
 
-          {mounted && total > 0 && (
+          {mounted && displayedTodos.length > 0 && (
             <div className="mx-auto mt-5 max-w-xs">
               {/* Stats cards */}
               <div className="mb-3 flex justify-center gap-3">
@@ -130,7 +155,7 @@ export default function Home() {
             <section>
               {mounted ? (
                 <TodoList
-                  todos={todos}
+                  todos={displayedTodos}
                   onToggle={handleToggle}
                   onDelete={handleDelete}
                   onEdit={handleEdit}
@@ -140,7 +165,7 @@ export default function Home() {
               )}
             </section>
 
-            {mounted && todos.length > 0 && (
+            {mounted && displayedTodos.length > 0 && (
               <div className="mt-6 text-center">
                 <button
                   onClick={handleReset}
