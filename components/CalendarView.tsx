@@ -35,8 +35,8 @@ export default function CalendarView({ todos }: Props) {
   while (cells.length % 7 !== 0) cells.push(null);
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-      <p className="mb-3 text-center text-xs font-semibold tracking-wide text-gray-400">
+    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-md shadow-violet-100/40">
+      <p className="mb-3 text-center text-xs font-bold uppercase tracking-widest text-gray-400">
         達成カレンダー
       </p>
 
@@ -45,17 +45,17 @@ export default function CalendarView({ todos }: Props) {
         <button
           onClick={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
           className="flex h-7 w-7 items-center justify-center rounded-lg text-lg text-gray-400
-                     transition-colors hover:bg-gray-100 hover:text-gray-600"
+                     transition-colors hover:bg-violet-50 hover:text-violet-500"
         >
           ‹
         </button>
-        <span className="text-sm font-semibold text-gray-700">
+        <span className="text-sm font-bold text-gray-700">
           {year}年 {month + 1}月
         </span>
         <button
           onClick={() => setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
           className="flex h-7 w-7 items-center justify-center rounded-lg text-lg text-gray-400
-                     transition-colors hover:bg-gray-100 hover:text-gray-600"
+                     transition-colors hover:bg-violet-50 hover:text-violet-500"
         >
           ›
         </button>
@@ -66,7 +66,7 @@ export default function CalendarView({ todos }: Props) {
         {DOW.map((label, i) => (
           <div
             key={label}
-            className={`text-xs font-medium ${
+            className={`text-xs font-semibold ${
               i === 0 ? 'text-red-400' : i === 6 ? 'text-blue-400' : 'text-gray-400'
             }`}
           >
@@ -95,7 +95,10 @@ export default function CalendarView({ todos }: Props) {
             <div
               key={i}
               className={`flex flex-col items-center rounded-lg py-0.5 text-xs
-                ${isToday ? 'bg-blue-500 font-semibold text-white' : textColor}`}
+                ${isToday
+                  ? 'bg-violet-500 font-bold text-white'
+                  : textColor
+                }`}
             >
               <span className="leading-5">{day}</span>
               {achieved && <span className="text-sm leading-4">👑</span>}

@@ -7,6 +7,15 @@ import TodoInput from '@/components/TodoInput';
 import TodoList from '@/components/TodoList';
 import CalendarView from '@/components/CalendarView';
 
+function getMotivationalMessage(remaining: number, total: number): string {
+  if (total === 0) return 'さあ、今日のタスクを追加しましょう！';
+  if (remaining === 0) return '全タスク完了！最高の一日！🌟';
+  const pct = ((total - remaining) / total) * 100;
+  if (pct === 0) return 'よし、始めよう！一歩一歩進もう 💪';
+  if (pct < 50) return 'いい調子！このまま続けよう 🔥';
+  return 'もうすぐゴール！ラストスパート！⚡';
+}
+
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [mounted, setMounted] = useState(false);
@@ -57,36 +66,75 @@ export default function Home() {
     setTodos([]);
   }
 
+  const remaining = todos.filter((t) => !t.completed).length;
+  const completed = todos.filter((t) => t.completed).length;
+  const total = todos.length;
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const message = getMotivationalMessage(remaining, total);
+
+  const dateLabel = mounted
+    ? new Date().toLocaleDateString('ja-JP', { month: 'long', day: 'numeric', weekday: 'short' })
+    : '';
+
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-10">
+    <main className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50 px-4 py-8">
       <div className="mx-auto w-full max-w-4xl">
+
+        {/* ── Header ── */}
         <header className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-800">
-            {mounted
-              ? new Date().toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })
-              : ''}
-            のToDoリスト
+          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-4 py-1.5 text-sm font-bold text-violet-600">
+            <span>⚡</span>
+            <span>今日のミッション</span>
+          </div>
+
+          <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+            {dateLabel && `${dateLabel}のタスク`}
           </h1>
-          <p className="mt-1 text-sm text-gray-500">タスクを整理して、一つずつ片付けましょう</p>
+
+          <p className="mt-2 text-sm font-medium text-gray-500">{message}</p>
+
+          {mounted && total > 0 && (
+            <div className="mx-auto mt-5 max-w-xs">
+              {/* Stats cards */}
+              <div className="mb-3 flex justify-center gap-3">
+                <div className="flex-1 rounded-2xl bg-white px-4 py-3 text-center shadow-sm ring-1 ring-gray-100">
+                  <p className="text-2xl font-extrabold text-violet-600">{remaining}</p>
+                  <p className="text-xs text-gray-400">残りタスク</p>
+                </div>
+                <div className="flex-1 rounded-2xl bg-white px-4 py-3 text-center shadow-sm ring-1 ring-gray-100">
+                  <p className="text-2xl font-extrabold text-emerald-500">{completed}</p>
+                  <p className="text-xs text-gray-400">完了済み</p>
+                </div>
+              </div>
+              {/* Progress bar */}
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-gray-100">
+                <div
+                  className="h-2.5 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 transition-all duration-700"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <p className="mt-1 text-xs text-gray-400">{pct}% 完了</p>
+            </div>
+          )}
         </header>
 
+        {/* ── Main layout ── */}
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-          {/* Calendar sidebar */}
-          {mounted && (
-            <aside className="lg:sticky lg:top-10 lg:w-72 lg:shrink-0">
-              <CalendarView todos={todos} />
-            </aside>
-          )}
 
-          {/* Todo section */}
-          <div className="min-w-0 flex-1">
-            <section className="mb-6">
+          {/* Todo section — first on mobile, right on desktop */}
+          <div className="order-1 min-w-0 flex-1 lg:order-2">
+            <section className="mb-5">
               <TodoInput onAdd={handleAdd} />
             </section>
 
             <section>
               {mounted ? (
-                <TodoList todos={todos} onToggle={handleToggle} onDelete={handleDelete} onEdit={handleEdit} />
+                <TodoList
+                  todos={todos}
+                  onToggle={handleToggle}
+                  onDelete={handleDelete}
+                  onEdit={handleEdit}
+                />
               ) : (
                 <div className="py-12 text-center text-lg text-gray-300">読み込み中...</div>
               )}
@@ -96,7 +144,7 @@ export default function Home() {
               <div className="mt-6 text-center">
                 <button
                   onClick={handleReset}
-                  className="rounded-xl border border-red-300 px-5 py-2.5 text-sm font-medium text-red-400
+                  className="rounded-xl border border-red-200 px-5 py-2.5 text-sm font-medium text-red-400
                              transition-colors hover:bg-red-50 hover:text-red-600 active:bg-red-100"
                 >
                   全て削除
@@ -105,6 +153,12 @@ export default function Home() {
             )}
           </div>
 
+          {/* Calendar sidebar — second on mobile, left on desktop */}
+          {mounted && (
+            <aside className="order-2 lg:order-1 lg:sticky lg:top-8 lg:w-72 lg:shrink-0">
+              <CalendarView todos={todos} />
+            </aside>
+          )}
         </div>
       </div>
     </main>
