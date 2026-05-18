@@ -146,8 +146,15 @@ export default function Home() {
         {/* ── Main layout ── */}
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
 
-          {/* Todo section — first on mobile, right on desktop */}
-          <div className="order-1 min-w-0 flex-1 lg:order-2">
+          {/* Calendar sidebar — top on mobile, left on desktop */}
+          {mounted && (
+            <aside className="lg:sticky lg:top-8 lg:w-72 lg:shrink-0">
+              <CalendarView todos={todos} />
+            </aside>
+          )}
+
+          {/* Todo section */}
+          <div className="min-w-0 flex-1">
             <section className="mb-5">
               <TodoInput onAdd={handleAdd} />
             </section>
@@ -177,13 +184,6 @@ export default function Home() {
               </div>
             )}
           </div>
-
-          {/* Calendar sidebar — second on mobile, left on desktop */}
-          {mounted && (
-            <aside className="order-2 lg:order-1 lg:sticky lg:top-8 lg:w-72 lg:shrink-0">
-              <CalendarView todos={todos} />
-            </aside>
-          )}
         </div>
       </div>
     </main>
