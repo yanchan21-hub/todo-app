@@ -10,7 +10,8 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(npx next *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Skill(deploy)"
     ]
   }
 }
